@@ -18,14 +18,17 @@ export const auth = app.auth();
 export const collection = (parent: any, path: string) => parent.collection(path);
 export const getDocs = (query: any) => query.get();
 export const doc = (parent: any, path?: string, ...args: any[]) => {
-  if (parent.collection && path && args.length > 0) return parent.collection(path).doc(args[0]);
-  if (path) return parent.doc(path);
-  return parent.doc();
+  if (parent.collection && path) return parent.collection(path).doc(args[0]);
+  return parent.doc(path);
 };
 export const runTransaction = (db: any, fn: any) => db.runTransaction(fn);
 export const query = (ref: any, ...constraints: any[]) => {
   let q = ref;
-  for (const c of constraints) q = c(q);
+  for (const c of constraints) {
+    if (typeof c === 'function') {
+        q = c(q);
+    }
+  }
   return q;
 };
 export const where = (field: string, op: any, val: any) => (q: any) => q.where(field, op, val);

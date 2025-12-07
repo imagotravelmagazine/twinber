@@ -1,5 +1,4 @@
 import { type UserData, type Conversation, type Message, type UserInfo } from '../types';
-// FIX: Ensure we are importing the modular functions exported from our refactored firebase.ts
 import { 
   db, 
   auth, 
@@ -97,7 +96,7 @@ export const sendMessage = async (
   const conversationId = `${uid1}-${uid2}`;
   
   const conversationRef = doc(db, "conversations", conversationId);
-  const messagesColRef = collection(conversationRef, "messages");
+  const messagesColRef = collection(db, `conversations/${conversationId}/messages`);
 
   const newMessage: Message = {
     senderCode: currentUserData.code,
@@ -114,7 +113,6 @@ export const sendMessage = async (
         const participant1Data = { ...currentUserData.userInfo, code: currentUserData.code, uid: currentUserData.uid };
         const participant2Data = { ...partnerData.userInfo, code: partnerData.code, uid: partnerData.uid };
         
-        // FIX: Initialize the conversation object with all required properties at once to satisfy the 'Conversation' type.
         const newConversationData: Conversation = {
           id: conversationId,
           participantUids: [uid1, uid2],
@@ -177,7 +175,6 @@ export const getMessagesListener = (
   conversationId: string,
   callback: (messages: Message[]) => void
 ) => {
-  // Use a single path string for subcollections when using the compat wrapper
   const messagesColRef = collection(db, `conversations/${conversationId}/messages`);
   const q = query(messagesColRef, orderBy("timestamp", "asc"));
 

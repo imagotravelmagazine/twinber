@@ -1,4 +1,3 @@
-// FIX: Import Timestamp from the local firebase module instead of directly from 'firebase/firestore' to resolve import issues.
 import { Timestamp } from './firebase';
 
 export interface Question {
