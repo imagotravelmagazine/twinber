@@ -1,30 +1,6 @@
-import { initializeApp } from "firebase/app";
-import { 
-  getFirestore, 
-  collection, 
-  getDocs, 
-  doc, 
-  runTransaction, 
-  query, 
-  where, 
-  onSnapshot, 
-  orderBy, 
-  serverTimestamp, 
-  setDoc, 
-  getDoc,
-  Timestamp
-} from "firebase/firestore";
-import { 
-  getAuth, 
-  onAuthStateChanged, 
-  signInAnonymously, 
-  signInWithEmailAndPassword, 
-  signOut, 
-  createUserWithEmailAndPassword, 
-  EmailAuthProvider, 
-  linkWithCredential
-} from "firebase/auth";
-import type { User } from "firebase/auth";
+import firebase from "firebase/app";
+import "firebase/auth";
+import "firebase/firestore";
 
 const firebaseConfig = {
   apiKey: "AIza" + "SyCYjlPChfydywuXb4YZvlHPi8jO_LxzIo4",
@@ -35,29 +11,44 @@ const firebaseConfig = {
   appId: "1:445715471893:web:cc1ed73fba5435964af81c"
 };
 
-const app = initializeApp(firebaseConfig);
-export const db = getFirestore(app);
-export const auth = getAuth(app);
+const app = !firebase.apps.length ? firebase.initializeApp(firebaseConfig) : firebase.app();
+export const db = app.firestore();
+export const auth = app.auth();
 
-export { 
-  collection, 
-  getDocs, 
-  doc, 
-  runTransaction, 
-  query, 
-  where, 
-  onSnapshot, 
-  orderBy, 
-  serverTimestamp, 
-  setDoc, 
-  getDoc,
-  Timestamp,
-  onAuthStateChanged, 
-  signInAnonymously, 
-  signInWithEmailAndPassword, 
-  signOut, 
-  createUserWithEmailAndPassword, 
-  EmailAuthProvider, 
-  linkWithCredential,
-  type User 
+export const collection = (parent: any, path: string) => parent.collection(path);
+export const getDocs = (query: any) => query.get();
+export const doc = (parent: any, path?: string, ...args: any[]) => {
+  if (parent.collection && path) return parent.collection(path).doc(args[0]);
+  return parent.doc(path);
 };
+export const runTransaction = (db: any, fn: any) => db.runTransaction(fn);
+export const query = (ref: any, ...constraints: any[]) => {
+  let q = ref;
+  for (const c of constraints) q = c(q);
+  return q;
+};
+export const where = (field: string, op: any, val: any) => (q: any) => q.where(field, op, val);
+export const orderBy = (field: string, dir?: any) => (q: any) => q.orderBy(field, dir);
+export const onSnapshot = (ref: any, next: any, err?: any) => ref.onSnapshot(next, err);
+export const serverTimestamp = () => firebase.firestore.FieldValue.serverTimestamp();
+export const setDoc = (ref: any, data: any) => ref.set(data);
+export const getDoc = async (ref: any) => {
+  const snap = await ref.get();
+  return {
+    exists: () => snap.exists,
+    data: () => snap.data(),
+    id: snap.id,
+    ref: snap.ref
+  };
+};
+export const Timestamp = firebase.firestore.Timestamp;
+
+export const onAuthStateChanged = (auth: any, next: any) => auth.onAuthStateChanged(next);
+export const signInAnonymously = (auth: any) => auth.signInAnonymously();
+export const signInWithEmailAndPassword = (auth: any, e: string, p: string) => auth.signInWithEmailAndPassword(e, p);
+export const signOut = (auth: any) => auth.signOut();
+export const createUserWithEmailAndPassword = (auth: any, e: string, p: string) => auth.createUserWithEmailAndPassword(e, p);
+export const EmailAuthProvider = firebase.auth.EmailAuthProvider;
+export const linkWithCredential = (user: any, cred: any) => user.linkWithCredential(cred);
+
+export type User = firebase.User;
