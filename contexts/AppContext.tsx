@@ -1,5 +1,4 @@
-
-import React, { createContext, useContext, ReactNode, useState, useMemo, useCallback } from 'react';
+import React, { createContext, useContext, ReactNode, useState, useMemo, useCallback, useEffect } from 'react';
 import { getTranslator, getQuestionsForLanguage, LANGUAGES, LanguageCode, AllUITranslationKeys } from '../i18n';
 import { Question } from '../types';
 
@@ -18,7 +17,11 @@ interface AppProviderProps {
 }
 
 export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
-    const [language, setLanguage] = useState<LanguageCode | null>(null);
+    // Inizializza la lingua leggendo dal localStorage se disponibile
+    const [language, setLanguage] = useState<LanguageCode | null>(() => {
+        const savedLang = localStorage.getItem('twinber-language');
+        return (savedLang as LanguageCode) || null;
+    });
 
     const questions = useMemo(() => {
         return getQuestionsForLanguage(language || 'en');
@@ -30,7 +33,19 @@ export const AppProvider: React.FC<AppProviderProps> = ({ children }) => {
     
     const setLanguageCallback = useCallback((lang: LanguageCode | null) => {
         setLanguage(lang);
+        if (lang) {
+            localStorage.setItem('twinber-language', lang);
+        } else {
+            localStorage.removeItem('twinber-language');
+        }
     }, []);
+    
+    // Effetto per aggiornare il titolo della pagina e l'attributo lang dell'html
+    useEffect(() => {
+        if (language) {
+            document.documentElement.lang = language;
+        }
+    }, [language]);
     
     const value = { language, setLanguage: setLanguageCallback, t, questions, languages: LANGUAGES };
     
