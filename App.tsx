@@ -32,7 +32,7 @@ type SavedQuizProgress = {
 
 // ⚠️ IMPORTANTE: Sostituisci 'LA_TUA_EMAIL_QUI@GMAIL.COM' con la tua vera email.
 // Solo l'email scritta qui potrà accedere al pannello di controllo.
-const ADMIN_EMAILS = ['alessandrovilla4@gmail.com'];
+const ADMIN_EMAILS = ['alessandrovilla4@gmail.com', 'fafromitaly@gmail.com'];
 
 const App: React.FC = () => {
   const { language, setLanguage, t } = useAppContext();
