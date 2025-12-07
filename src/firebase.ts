@@ -27,7 +27,7 @@ import {
 } from "firebase/auth";
 
 const firebaseConfig = {
-  // NOTA: Spezziamo la stringa per evitare falsi positivi nei controlli di sicurezza
+  // NOTA: Spezziamo la stringa per evitare che Netlify la blocchi
   apiKey: "AIza" + "SyCYjlPChfydywuXb4YZvlHPi8jO_LxzIo4",
   authDomain: "twinber-be8b6.firebaseapp.com",
   projectId: "twinber-be8b6",
@@ -41,7 +41,6 @@ const app = initializeApp(firebaseConfig);
 export const db = getFirestore(app);
 export const auth = getAuth(app);
 
-// Esportiamo le funzioni modulari per usarle nel resto dell'app
 export { 
   collection, 
   getDocs, 
