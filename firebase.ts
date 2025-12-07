@@ -1,6 +1,6 @@
-import firebase from "firebase/app";
-import "firebase/auth";
-import "firebase/firestore";
+import firebase from "firebase/compat/app";
+import "firebase/compat/auth";
+import "firebase/compat/firestore";
 
 const firebaseConfig = {
   apiKey: "AIza" + "SyCYjlPChfydywuXb4YZvlHPi8jO_LxzIo4",
@@ -29,7 +29,7 @@ export const query = (ref: any, ...constraints: any[]) => {
 };
 export const where = (field: string, op: any, val: any) => (q: any) => q.where(field, op, val);
 export const orderBy = (field: string, dir?: any) => (q: any) => q.orderBy(field, dir);
-export const onSnapshot = (ref: any, next: any, err?: any) => ref.onSnapshot(next, err);
+export const onSnapshot = (ref: any, ...args: any[]) => ref.onSnapshot(...args);
 export const serverTimestamp = () => firebase.firestore.FieldValue.serverTimestamp();
 export const setDoc = (ref: any, data: any) => ref.set(data);
 export const getDoc = async (ref: any) => {
@@ -41,7 +41,9 @@ export const getDoc = async (ref: any) => {
     ref: snap.ref
   };
 };
+
 export const Timestamp = firebase.firestore.Timestamp;
+export type Timestamp = firebase.firestore.Timestamp;
 
 export const onAuthStateChanged = (auth: any, next: any) => auth.onAuthStateChanged(next);
 export const signInAnonymously = (auth: any) => auth.signInAnonymously();
