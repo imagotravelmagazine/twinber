@@ -1,0 +1,5 @@
+{
+  "name": "Twinber3",
+  "description": "An application that measures compatibility between two people based on a 1000-question quiz. Each user gets a unique code to share and compare their answers with a partner, revealing a detailed compatibility score across different aspects of a relationship.",
+  "requestFramePermissions": []
+}
