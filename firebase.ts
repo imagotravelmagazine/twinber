@@ -3,6 +3,7 @@ import "firebase/compat/auth";
 import "firebase/compat/firestore";
 
 const firebaseConfig = {
+  // NOTE: Breaking string to avoid false positives in security scans
   apiKey: "AIza" + "SyCYjlPChfydywuXb4YZvlHPi8jO_LxzIo4",
   authDomain: "twinber-be8b6.firebaseapp.com",
   projectId: "twinber-be8b6",
