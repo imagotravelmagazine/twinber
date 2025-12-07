@@ -30,8 +30,7 @@ type SavedQuizProgress = {
   userInfo: UserInfo;
 };
 
-// ⚠️ IMPORTANTE: Sostituisci 'LA_TUA_EMAIL_QUI@GMAIL.COM' con la tua vera email.
-// Solo l'email scritta qui potrà accedere al pannello di controllo.
+// ⚠️ IMPORTANTE: Sostituisci o aggiungi qui le email che devono avere accesso Admin.
 const ADMIN_EMAILS = ['alessandrovilla4@gmail.com', 'fafromitaly@gmail.com'];
 
 const App: React.FC = () => {
@@ -129,17 +128,25 @@ const App: React.FC = () => {
     setView('home');
     setUserInfo(null);
     setComparisonReport(null);
-    setLanguage(null);
+    // FIX: Non resettiamo la lingua qui per mantenerla al refresh
     localStorage.removeItem('twinber-quiz-progress');
     setSavedQuizProgress(null);
     // User data is tied to auth, so we don't clear it here.
-  }, [setLanguage]);
+  }, []);
 
   const handleStart = useCallback(() => {
     if (language) {
-      setView('userInfo');
+      // FIX: Se c'è un progresso salvato, saltiamo la pagina di inserimento dati
+      // e andiamo direttamente alla scelta, caricando i dati salvati temporaneamente.
+      if (savedQuizProgress) {
+        setUserInfo(savedQuizProgress.userInfo);
+        setView('choice');
+      } else {
+        // Se non c'è progresso, chiediamo i dati normalmente
+        setView('userInfo');
+      }
     }
-  }, [language]);
+  }, [language, savedQuizProgress]);
 
   const handleUserInfoSubmit = useCallback((info: UserInfo) => {
     setUserInfo(info);
@@ -151,15 +158,25 @@ const App: React.FC = () => {
         if (window.confirm(t('confirm_discard_progress'))) {
             localStorage.removeItem('twinber-quiz-progress');
             setSavedQuizProgress(null);
-            setView('questionnaire');
+            // FIX: Se scartiamo i progressi, dobbiamo tornare a chiedere i dati dell'utente (UserInfo)
+            // perché quelli attuali potrebbero essere quelli vecchi recuperati dal salvataggio.
+            setUserInfo(null); 
+            setView('userInfo');
         }
     } else {
-        setView('questionnaire');
+        // Se arriviamo qui da UserInfoPage senza progressi precedenti, userInfo è già settato
+        if (userInfo) {
+           setView('questionnaire');
+        } else {
+           // Fallback di sicurezza
+           setView('userInfo');
+        }
     }
-  }, [savedQuizProgress, t]);
+  }, [savedQuizProgress, t, userInfo]);
   
   const handleResumeQuiz = useCallback(() => {
     if (savedQuizProgress) {
+        // Assicuriamoci di usare le info salvate nel progresso
         setUserInfo(savedQuizProgress.userInfo);
         setView('questionnaire');
     }
@@ -172,23 +189,35 @@ const App: React.FC = () => {
 
   const handleQuizComplete = useCallback(async (answers: number[]): Promise<void> => {
     if (!userInfo || !authUser) {
+      console.error("Missing user info or auth user at quiz completion");
       handleReset();
       return Promise.reject(new Error("User info or auth user is missing"));
     }
-    const code = generateUserCode();
-    const data: UserData = { uid: authUser.uid, userInfo, code, answers };
-    
-    await saveUser(data);
-    setCurrentUserData(data);
-    
+
     try {
-      localStorage.removeItem('twinber-quiz-progress');
-      setSavedQuizProgress(null);
+        setIsLoading(true);
+        const code = generateUserCode();
+        const data: UserData = { uid: authUser.uid, userInfo, code, answers };
+        
+        await saveUser(data);
+        setCurrentUserData(data);
+        
+        try {
+          localStorage.removeItem('twinber-quiz-progress');
+          setSavedQuizProgress(null);
+        } catch (error) {
+          console.error('Failed to remove quiz progress from localStorage', error);
+        }
+        
+        // FIX: Assicuriamoci che lo stato sia pulito prima di cambiare vista
+        setUserInfo(null);
+        setView('userResult');
     } catch (error) {
-      console.error('Failed to remove quiz progress from localStorage', error);
+        console.error("Error saving quiz results:", error);
+        alert("Errore nel salvataggio dei risultati. Per favore riprova.");
+    } finally {
+        setIsLoading(false);
     }
-    setUserInfo(null);
-    setView('userResult');
     return Promise.resolve();
   }, [userInfo, authUser, handleReset]);
   
@@ -290,9 +319,10 @@ const App: React.FC = () => {
     setConversations([]);
     setReportsHistory([]);
     setView('home');
-    setLanguage(null);
+    // FIX: Non resettiamo la lingua al logout
+    // setLanguage(null);
     // A new anonymous user will be signed in automatically by the onAuthStateChanged listener
-  }, [setLanguage]);
+  }, []);
 
   const handleNavigateToRegister = useCallback(() => setView('register'), []);
   const handleNavigateToUserLogin = useCallback(() => setView('userLogin'), []);
@@ -353,8 +383,11 @@ const App: React.FC = () => {
     switch (view) {
         case 'userInfo': return () => setView('home');
         case 'choice':
-            if (userInfo && !currentUserData) return () => setView('userInfo');
-            return isUserAuthenticated ? null : handleReset; // No back from choice if logged in
+            // Se siamo in choice ma NON abbiamo ancora un profilo completo (stiamo facendo il quiz)
+            // e abbiamo info utente, tornare indietro significa andare a userInfo.
+            // MA se siamo arrivati qui saltando userInfo (perché c'è progresso), tornare indietro deve andare alla Home.
+            if (userInfo && !currentUserData && !savedQuizProgress) return () => setView('userInfo');
+            return () => setView('home'); 
         case 'questionnaire': return () => setView('choice');
         case 'userResult': return () => setView('choice');
         case 'comparison': return () => setView('choice');
@@ -367,7 +400,7 @@ const App: React.FC = () => {
         case 'userLogin': return () => setView('choice');
         default: return null;
     }
-  }, [view, currentUserData, userInfo, handleViewMessageBox, handleViewAdmin, handleReset, isUserAuthenticated]);
+  }, [view, currentUserData, userInfo, handleViewMessageBox, handleViewAdmin, handleReset, savedQuizProgress]);
 
   const backHandler = getBackHandler();
 
@@ -422,6 +455,7 @@ const App: React.FC = () => {
                   onResumeQuiz={handleResumeQuiz}
                   onLogin={handleNavigateToUserLogin}
                   isUserAuthenticated={isUserAuthenticated}
+                  savedUserName={savedQuizProgress?.userInfo?.name}
                 />;
       case 'questionnaire':
         if (!userInfo) {
