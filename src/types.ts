@@ -1,4 +1,4 @@
-import { Timestamp } from './firebase';
+import { Timestamp } from 'firebase/firestore';
 
 export interface Question {
   category: string;
@@ -39,20 +39,20 @@ export interface CompatibilityReport {
 }
 
 export interface Message {
-  senderCode: string; // Keep senderCode for display
+  senderCode: string;
   senderUid: string;
   text: string;
-  timestamp: Timestamp | any; // Can be a number or a Firestore Timestamp
+  timestamp: Timestamp | any; 
 }
 
 export interface Conversation {
-  id: string; // "UID1-UID2" sorted
+  id: string;
   participant1: UserInfo & { code: string; uid: string; };
   participant2: UserInfo & { code: string; uid: string; };
   participantUids: string[];
   compatibilityScore: number;
   lastMessage: Message | null;
-  lastUpdate: Timestamp | any; // Can be a number or a Firestore Timestamp
+  lastUpdate: Timestamp | any;
 }
 
 export type Conversations = Record<string, Conversation>;
