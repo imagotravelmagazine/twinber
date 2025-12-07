@@ -27,8 +27,8 @@ import {
 } from "firebase/auth";
 
 const firebaseConfig = {
-  // NOTA: Spezziamo la stringa per evitare che Netlify la blocchi
-  apiKey: "AIza" + "SyCYjlPChfydywuXb4YZvlHPi8jO_LxzIo4",
+  // Ora leggiamo la chiave dalle variabili d'ambiente di Netlify/Vite
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
   authDomain: "twinber-be8b6.firebaseapp.com",
   projectId: "twinber-be8b6",
   storageBucket: "twinber-be8b6.firebasestorage.app",
