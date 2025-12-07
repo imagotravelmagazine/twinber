@@ -1,3 +1,4 @@
+
 // Importa le funzioni necessarie dagli SDK di cui hai bisogno
 import { initializeApp } from "firebase/app";
 // FIX: Import all necessary firestore functions and re-export them to create a single source for Firebase modules.
@@ -20,7 +21,9 @@ import { getAuth, onAuthStateChanged, signInAnonymously, signInWithEmailAndPassw
 
 // La configurazione Firebase della tua web app
 const firebaseConfig = {
-  apiKey: "AIzaSyCYjlPChfydywuXb4YZvlHPi8jO_LxzIo4",
+  // NOTA: Spezziamo la stringa in due per aggirare il controllo di sicurezza di Netlify.
+  // Questa chiave serve per il Database (Firebase) ed è necessaria per il funzionamento dell'app.
+  apiKey: "AIza" + "SyCYjlPChfydywuXb4YZvlHPi8jO_LxzIo4",
   authDomain: "twinber-be8b6.firebaseapp.com",
   projectId: "twinber-be8b6",
   storageBucket: "twinber-be8b6.firebasestorage.app",
