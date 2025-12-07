@@ -139,6 +139,7 @@ const Questionnaire: React.FC<QuestionnaireProps> = ({ onComplete, userInfo, ini
               .catch(err => {
                 console.error("Failed to complete quiz:", err);
                 setIsCompleting(false);
+                alert("Si è verificato un errore nel salvataggio. Per favore controlla la tua connessione e riprova.");
               });
         } else if (isLastInCategory) {
             setAnimationClass('animate-fade-out');
