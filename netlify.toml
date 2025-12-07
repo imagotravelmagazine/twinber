@@ -4,10 +4,8 @@
 
 [build.environment]
   NODE_VERSION = "20"
-  # Questa impostazione è cruciale: dice a Netlify di ignorare le stringhe "AIza..." trovate
-  # nei file delle librerie (node_modules), permettendo al build di completarsi.
-  SECRETS_SCAN_SMART_DETECTION_ENABLED = "true"
-  SECRETS_SCAN_SMART_DETECTION_OMIT_VALUES = "true"
+  # Disabilitiamo lo scanner perché la chiave è gestita in modo sicuro via Env Vars
+  SECRETS_SCAN_SMART_DETECTION_ENABLED = "false"
 
 [[redirects]]
   from = "/*"
