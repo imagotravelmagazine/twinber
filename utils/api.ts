@@ -1,5 +1,4 @@
 import { type UserData, type Conversation, type Message, type UserInfo } from '../types';
-// FIX: Consolidate all firebase and firestore imports from the local firebase module to resolve import errors.
 import { 
   db, 
   auth, 
@@ -18,9 +17,6 @@ import {
   getDoc 
 } from '../firebase';
 
-/**
- * Fetches the list of all users from the Firestore database. (Admin operation)
- */
 export const fetchUsers = async (): Promise<UserData[]> => {
   try {
     const querySnapshot = await getDocs(collection(db, "users"));
@@ -35,9 +31,6 @@ export const fetchUsers = async (): Promise<UserData[]> => {
   }
 };
 
-/**
- * Saves a new user to the Firestore database using their UID as the document ID.
- */
 export const saveUser = async (userData: UserData): Promise<void> => {
   try {
     const userRef = doc(db, "users", userData.uid);
@@ -48,9 +41,6 @@ export const saveUser = async (userData: UserData): Promise<void> => {
   }
 };
 
-/**
- * Fetches a single user's data by their UID.
- */
 export const fetchUserDataByUid = async (uid: string): Promise<UserData | null> => {
     try {
         const userRef = doc(db, "users", uid);
@@ -65,9 +55,6 @@ export const fetchUserDataByUid = async (uid: string): Promise<UserData | null> 
     }
 };
 
-/**
- * Fetches a single user's data by their public code.
- */
 export const fetchUserDataByCode = async (code: string): Promise<UserData | null> => {
     try {
         const usersRef = collection(db, "users");
@@ -83,10 +70,6 @@ export const fetchUserDataByCode = async (code: string): Promise<UserData | null
     }
 };
 
-
-/**
- * Sends a message and updates or creates a conversation.
- */
 export const sendMessage = async (
   currentUserData: UserData,
   partnerData: UserData,
@@ -97,7 +80,8 @@ export const sendMessage = async (
   const conversationId = `${uid1}-${uid2}`;
   
   const conversationRef = doc(db, "conversations", conversationId);
-  const messagesColRef = collection(conversationRef, "messages");
+  // FIX: Costruiamo il percorso come stringa unica per evitare errori di argomenti nella sintassi modulare
+  const messagesColRef = collection(db, `conversations/${conversationId}/messages`);
 
   const newMessage: Message = {
     senderCode: currentUserData.code,
@@ -114,7 +98,6 @@ export const sendMessage = async (
         const participant1Data = { ...currentUserData.userInfo, code: currentUserData.code, uid: currentUserData.uid };
         const participant2Data = { ...partnerData.userInfo, code: partnerData.code, uid: partnerData.uid };
         
-        // FIX: Initialize the conversation object with all required properties at once to satisfy the 'Conversation' type.
         const newConversationData: Conversation = {
           id: conversationId,
           participantUids: [uid1, uid2],
@@ -142,10 +125,6 @@ export const sendMessage = async (
   }
 };
 
-/**
- * Sets up a real-time listener for a user's conversations.
- * @returns An unsubscribe function.
- */
 export const getConversationsListener = (
   currentUserUid: string, 
   callback: (conversations: Conversation[]) => void
@@ -169,14 +148,11 @@ export const getConversationsListener = (
   return unsubscribe;
 };
 
-/**
- * Sets up a real-time listener for messages in a conversation.
- * @returns An unsubscribe function.
- */
 export const getMessagesListener = (
   conversationId: string,
   callback: (messages: Message[]) => void
 ) => {
+  // FIX: Percorso come stringa unica
   const messagesColRef = collection(db, `conversations/${conversationId}/messages`);
   const q = query(messagesColRef, orderBy("timestamp", "asc"));
 
@@ -193,9 +169,6 @@ export const getMessagesListener = (
   return unsubscribe;
 };
 
-/**
- * Links an anonymous user account to a permanent email/password account.
- */
 export const linkAnonymousAccountToEmail = async (email: string, password: string): Promise<void> => {
     if (!auth.currentUser) {
         throw new Error("No user is currently signed in.");
