@@ -177,7 +177,8 @@ export const getMessagesListener = (
   conversationId: string,
   callback: (messages: Message[]) => void
 ) => {
-  const messagesColRef = collection(db, "conversations", conversationId, "messages");
+  // Use a single path string for subcollections when using the compat wrapper
+  const messagesColRef = collection(db, `conversations/${conversationId}/messages`);
   const q = query(messagesColRef, orderBy("timestamp", "asc"));
 
   const unsubscribe = onSnapshot(q, (querySnapshot) => {

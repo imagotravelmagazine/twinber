@@ -1,5 +1,5 @@
-// FIX: Import Timestamp directly from firestore to satisfy TypeScript build.
-import { Timestamp } from 'firebase/firestore';
+// FIX: Import Timestamp from the local firebase module instead of directly from 'firebase/firestore' to resolve import issues.
+import { Timestamp } from './firebase';
 
 export interface Question {
   category: string;

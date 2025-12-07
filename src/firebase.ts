@@ -1,34 +1,8 @@
-import { initializeApp } from "firebase/app";
-import { 
-  getFirestore, 
-  collection, 
-  getDocs, 
-  doc, 
-  runTransaction, 
-  query, 
-  where, 
-  onSnapshot, 
-  orderBy, 
-  serverTimestamp, 
-  setDoc, 
-  getDoc,
-  Timestamp
-} from "firebase/firestore";
-import { 
-  getAuth, 
-  onAuthStateChanged, 
-  signInAnonymously, 
-  signInWithEmailAndPassword, 
-  signOut, 
-  createUserWithEmailAndPassword, 
-  EmailAuthProvider, 
-  linkWithCredential,
-  type User 
-} from "firebase/auth";
+import firebase from "firebase/compat/app";
+import "firebase/compat/auth";
+import "firebase/compat/firestore";
 
-// La configurazione Firebase della tua web app
 const firebaseConfig = {
-  // NOTA: Spezziamo la stringa in due per aggirare il controllo di sicurezza automatico di Netlify.
   apiKey: "AIza" + "SyCYjlPChfydywuXb4YZvlHPi8jO_LxzIo4",
   authDomain: "twinber-be8b6.firebaseapp.com",
   projectId: "twinber-be8b6",
@@ -37,36 +11,47 @@ const firebaseConfig = {
   appId: "1:445715471893:web:cc1ed73fba5435964af81c"
 };
 
-// Inizializza Firebase usando la sintassi Modulare
-const app = initializeApp(firebaseConfig);
+const app = !firebase.apps.length ? firebase.initializeApp(firebaseConfig) : firebase.app();
+export const db = app.firestore();
+export const auth = app.auth();
 
-// Inizializza i servizi
-export const db = getFirestore(app);
-export const auth = getAuth(app);
-
-// Riesporta le funzioni necessarie in modo che gli altri file (come api.ts e App.tsx)
-// possano importarle da qui senza dover cambiare tutte le loro importazioni.
-export { 
-  // Firestore
-  collection, 
-  getDocs, 
-  doc, 
-  runTransaction, 
-  query, 
-  where, 
-  onSnapshot, 
-  orderBy, 
-  serverTimestamp, 
-  setDoc, 
-  getDoc,
-  Timestamp,
-  // Auth
-  onAuthStateChanged, 
-  signInAnonymously, 
-  signInWithEmailAndPassword, 
-  signOut, 
-  createUserWithEmailAndPassword, 
-  EmailAuthProvider, 
-  linkWithCredential,
-  type User 
+export const collection = (parent: any, path: string) => parent.collection(path);
+export const getDocs = (query: any) => query.get();
+export const doc = (parent: any, path?: string, ...args: any[]) => {
+  if (parent.collection && path && args.length > 0) return parent.collection(path).doc(args[0]);
+  if (path) return parent.doc(path);
+  return parent.doc();
 };
+export const runTransaction = (db: any, fn: any) => db.runTransaction(fn);
+export const query = (ref: any, ...constraints: any[]) => {
+  let q = ref;
+  for (const c of constraints) q = c(q);
+  return q;
+};
+export const where = (field: string, op: any, val: any) => (q: any) => q.where(field, op, val);
+export const orderBy = (field: string, dir?: any) => (q: any) => q.orderBy(field, dir);
+export const onSnapshot = (ref: any, ...args: any[]) => ref.onSnapshot(...args);
+export const serverTimestamp = () => firebase.firestore.FieldValue.serverTimestamp();
+export const setDoc = (ref: any, data: any) => ref.set(data);
+export const getDoc = async (ref: any) => {
+  const snap = await ref.get();
+  return {
+    exists: () => snap.exists,
+    data: () => snap.data(),
+    id: snap.id,
+    ref: snap.ref
+  };
+};
+
+export const Timestamp = firebase.firestore.Timestamp;
+export type Timestamp = firebase.firestore.Timestamp;
+
+export const onAuthStateChanged = (auth: any, next: any) => auth.onAuthStateChanged(next);
+export const signInAnonymously = (auth: any) => auth.signInAnonymously();
+export const signInWithEmailAndPassword = (auth: any, e: string, p: string) => auth.signInWithEmailAndPassword(e, p);
+export const signOut = (auth: any) => auth.signOut();
+export const createUserWithEmailAndPassword = (auth: any, e: string, p: string) => auth.createUserWithEmailAndPassword(e, p);
+export const EmailAuthProvider = firebase.auth.EmailAuthProvider;
+export const linkWithCredential = (user: any, cred: any) => user.linkWithCredential(cred);
+
+export type User = firebase.User;
