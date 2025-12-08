@@ -12,6 +12,8 @@ interface ChoicePageProps {
   onResumeQuiz: () => void;
   onLogin: () => void;
   isUserAuthenticated: boolean;
+  // FIX: Aggiunta la proprietà mancante per risolvere l'errore TS2322
+  savedUserName?: string;
 }
 
 const PencilIcon = () => (
@@ -27,7 +29,7 @@ const PlayIcon = () => (
 );
 
 
-const ChoicePage: React.FC<ChoicePageProps> = ({ onStartQuiz, onStartComparison, onViewHistory, hasHistory, hasSavedProgress, onResumeQuiz, onLogin, isUserAuthenticated }) => {
+const ChoicePage: React.FC<ChoicePageProps> = ({ onStartQuiz, onStartComparison, onViewHistory, hasHistory, hasSavedProgress, onResumeQuiz, onLogin, isUserAuthenticated, savedUserName }) => {
     const { t } = useAppContext();
     return (
         <div className="flex flex-col items-center justify-center text-center animate-fade-in">
@@ -46,7 +48,10 @@ const ChoicePage: React.FC<ChoicePageProps> = ({ onStartQuiz, onStartComparison,
                     >
                         <PlayIcon />
                         <h2 className="text-2xl font-bold text-emerald-300 mb-3">{t('choice_resume_title')}</h2>
-                        <p className="text-slate-300 mb-6 flex-grow">{t('choice_resume_description')}</p>
+                        <p className="text-slate-300 mb-6 flex-grow">
+                            {t('choice_resume_description')}
+                            {savedUserName && <span className="block mt-1 font-semibold text-emerald-400">({savedUserName})</span>}
+                        </p>
                         <Button variant="primary" className="w-full pointer-events-none bg-emerald-500/80 group-hover:bg-emerald-500 text-slate-900">{t('choice_resume_button')}</Button>
                     </div>
                 )}
